@@ -1,0 +1,17 @@
+variant: fcos
+version: 1.5.0
+storage:
+  files:
+    - path: /etc/containers/systemd/echo-server.container
+      contents:
+        inline: |
+          [Unit]
+          Description=Echo Server
+          Wants=network-online.target
+          After=network-online.target
+
+          [Container]
+          Image=docker.io/jmalloc/echo-server:latest
+
+          [Install]
+          WantedBy=multi-user.target
