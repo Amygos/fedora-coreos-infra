@@ -6,6 +6,40 @@ module "node-exporter" {
   source = "./../../modules/node-exporter"
 }
 
+module "traefik" {
+  source = "./../../modules/traefik"
+  dynamic_config = {
+    http = {
+      routers = {
+        test = {
+          rule    = "path(`/echo`)"
+          service = "echo-server"
+        }
+        metrics = {
+          rule    = "Path(`/${module.node-exporter.telemetry-path}`)"
+          service = "node-exporter"
+        }
+      }
+      services = {
+        echo-server = {
+          loadBalancer = {
+            servers = [
+              { url = "http://localhost:8080" }
+            ]
+          }
+        }
+        node-exporter = {
+          loadBalancer = {
+            servers = [
+              { url = "http://localhost:9100" }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+
 module "volume" {
   source     = "./../../modules/volume"
   name       = "state"
@@ -38,8 +72,9 @@ data "ct_config" "ignition" {
   pretty_print = true
   strict       = true
   snippets = [
-    module.ssh_keys.butane_config,
     module.volume.butane_config,
+    module.traefik.butane_config,
+    module.ssh_keys.butane_config,
     module.node-exporter.butane_config,
   ]
 }

@@ -12,6 +12,7 @@ storage:
 
           [Container]
           Image=docker.io/jmalloc/echo-server:latest
+          PublishPort=8080:8080
 
           [Install]
           WantedBy=multi-user.target
